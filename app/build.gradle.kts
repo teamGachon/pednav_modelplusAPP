@@ -41,7 +41,5 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    dependencies {
-        implementation("org.tensorflow:tensorflow-lite:2.12.0")
-    }
+    implementation(libs.tensorflow.lite)
 }

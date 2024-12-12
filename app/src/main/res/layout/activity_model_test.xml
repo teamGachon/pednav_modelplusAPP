@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#FFFFFF">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Vehicle Detection Test"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Start Detection Button -->
+    <Button
+        android:id="@+id/btnStartDetection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Start Detection"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Stop Detection Button -->
+    <Button
+        android:id="@+id/btnStopDetection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Stop Detection"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Detection Result -->
+    <TextView
+        android:id="@+id/tvResult"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Detection Result: Waiting..."
+        android:textSize="16sp"
+        android:textStyle="italic"
+        android:gravity="center"
+        android:layout_marginTop="16dp" />
+
+</LinearLayout>
