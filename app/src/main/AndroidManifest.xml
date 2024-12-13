@@ -8,6 +8,9 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+
+
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -17,6 +20,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ModelTest"
+        android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="31">
 
         <!-- MainActivity -->
@@ -45,6 +49,15 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MODEL_TEST" />
+            </intent-filter>
+        </activity>
+
+        <!-- WebSocketTestActivity -->
+        <activity
+            android:name=".WebSocketTestActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.WEB_SOCKET_TEST" />
             </intent-filter>
         </activity>
     </application>
