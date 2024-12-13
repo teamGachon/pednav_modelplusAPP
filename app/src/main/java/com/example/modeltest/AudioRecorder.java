@@ -2,6 +2,7 @@ package com.example.modeltest;
 
 
 
+import android.annotation.SuppressLint;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
@@ -16,6 +17,7 @@ public class AudioRecorder {
 
     private AudioRecord audioRecord;
 
+    @SuppressLint("MissingPermission")
     public AudioRecorder() {
         audioRecord = new AudioRecord(
                 MediaRecorder.AudioSource.MIC,

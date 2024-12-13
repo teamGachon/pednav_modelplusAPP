@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import org.tensorflow.lite.Interpreter;
+import org.w3c.dom.Text;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -33,10 +34,10 @@ public class ModelTestActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_model_test);
 
-        Button onButton = findViewById(R.id.btnStartDetection); // "ON" button
-        Button offButton = findViewById(R.id.btnStopDetection); // "OFF" button
+        TextView onButton = findViewById(R.id.btnStartDetection); // "ON" button
+        TextView offButton = findViewById(R.id.btnStopDetection); // "OFF" button
 
         try {
             // Initialize the detector with the TFLite model path
@@ -54,9 +55,9 @@ public class ModelTestActivity extends AppCompatActivity {
                 if (!isDetectionRunning && soundDetector != null) {
                     soundDetector.startDetection();
                     isDetectionRunning = true;
-                    Toast.makeText(MainActivity.this, "Sound detection started", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ModelTestActivity.this, "Sound detection started", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(MainActivity.this, "Detection is already running", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ModelTestActivity.this, "Detection is already running", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -68,9 +69,9 @@ public class ModelTestActivity extends AppCompatActivity {
                 if (isDetectionRunning && soundDetector != null) {
                     soundDetector.stopDetection();
                     isDetectionRunning = false;
-                    Toast.makeText(MainActivity.this, "Sound detection stopped", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ModelTestActivity.this, "Sound detection stopped", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(MainActivity.this, "Detection is not running", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ModelTestActivity.this, "Detection is not running", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -85,3 +86,4 @@ public class ModelTestActivity extends AppCompatActivity {
         }
     }
 }
+
