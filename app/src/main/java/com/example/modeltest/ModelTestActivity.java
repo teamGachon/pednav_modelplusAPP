@@ -26,29 +26,31 @@ import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
+
 public class ModelTestActivity extends AppCompatActivity {
 
     private RealTimeSoundDetector soundDetector;
-    private boolean isDetectionRunning = false; // Track the detection status
+    private boolean isDetectionRunning = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_model_test);
 
-        TextView onButton = findViewById(R.id.btnStartDetection); // "ON" button
-        TextView offButton = findViewById(R.id.btnStopDetection); // "OFF" button
+        TextView tvResult = findViewById(R.id.tvResult); // For showing detection results
+        TextView onButton = findViewById(R.id.btnStartDetection);
+        TextView offButton = findViewById(R.id.btnStopDetection);
 
         try {
-            // Initialize the detector with the TFLite model path
-            soundDetector = new RealTimeSoundDetector(this, "car_detection_model.tflite");
+            // Initialize RealTimeSoundDetector with model and result TextView
+            soundDetector = new RealTimeSoundDetector(this, "car_detection_model.tflite", tvResult);
         } catch (IOException e) {
-            Log.e("MainActivity", "Failed to load model", e);
+            Log.e("ModelTestActivity", "Failed to load model", e);
             Toast.makeText(this, "Failed to initialize sound detector", Toast.LENGTH_LONG).show();
             return;
         }
 
-        // Set up the "ON" button to start detection
+        // Set up the "ON" button
         onButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -62,7 +64,7 @@ public class ModelTestActivity extends AppCompatActivity {
             }
         });
 
-        // Set up the "OFF" button to stop detection
+        // Set up the "OFF" button
         offButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -80,10 +82,8 @@ public class ModelTestActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Ensure the sound detector is stopped and cleaned up
         if (soundDetector != null) {
             soundDetector.stopDetection();
         }
     }
 }
-

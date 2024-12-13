@@ -77,5 +77,6 @@ dependencies {
     // TFLite
     implementation("org.tensorflow:tensorflow-lite:2.12.0")
     implementation("org.tensorflow:tensorflow-lite-support:0.4.0")
+    implementation("be.tarsos:dsp:2.4")
 
 }
