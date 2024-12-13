@@ -27,7 +27,7 @@ public class WebSocketTestActivity extends AppCompatActivity {
 
         // 권한 확인 및 요청
         if (hasRecordAudioPermission()) {
-            connectWebSocket("wss://inclab.gachon.ac.kr/audio/send");
+            connectWebSocket("ws://172.25.87.5:8081/audio/send");
         } else {
             requestRecordAudioPermission();
         }
