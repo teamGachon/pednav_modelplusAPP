@@ -37,8 +37,8 @@ public class ModelTestActivity extends AppCompatActivity {
         setContentView(R.layout.activity_model_test);
 
         tvResult = findViewById(R.id.tvResult);
-        Button btnStartDetection = findViewById(R.id.btnStartDetection);
-        Button btnStopDetection = findViewById(R.id.btnStopDetection);
+        TextView btnStartDetection = findViewById(R.id.btnStartDetection);
+        TextView btnStopDetection = findViewById(R.id.btnStopDetection);
 
         // Check audio recording permissions
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
