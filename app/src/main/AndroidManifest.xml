@@ -47,6 +47,15 @@
                 <action android:name="android.intent.action.MODEL_TEST" />
             </intent-filter>
         </activity>
+
+        <!-- SettingActivity -->
+        <activity
+            android:name=".SettingActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MODEL_TEST" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
