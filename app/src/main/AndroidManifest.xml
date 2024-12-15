@@ -19,15 +19,22 @@
         android:theme="@style/Theme.ModelTest"
         tools:targetApi="31">
 
-        <!-- MainActivity -->
+        <!-- SplashActivity -->
         <activity
-            android:name=".MainActivity"
-            android:exported="true">
+            android:name=".SplashActivity"
+            android:exported="true"
+            android:theme="@style/SplashActivityTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <!-- MainActivity -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
         </activity>
 
         <!-- ModelTestActivity -->
