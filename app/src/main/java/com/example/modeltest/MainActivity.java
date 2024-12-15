@@ -14,8 +14,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Navigate to Detection Test Activity
-        TextView btnGoDetectionTest = findViewById(R.id.btnGoDetectionTest);
-        btnGoDetectionTest.setOnClickListener(new View.OnClickListener(){
+        TextView btnVehicleDetection = findViewById(R.id.btnVehicleDetection);
+        btnVehicleDetection.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
                 Intent intent = new Intent(MainActivity.this, ModelTestActivity.class);
@@ -24,8 +24,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Navigate to Navigation Test Activity
-        TextView btnGoNavigationTest = findViewById(R.id.btnGoNavigationTest);
-        btnGoNavigationTest.setOnClickListener(new View.OnClickListener(){
+        TextView btnNavigation = findViewById(R.id.btnNavigation);
+        btnNavigation.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
                 Intent intent = new Intent(MainActivity.this, TMapAPIActivity.class);
@@ -34,8 +34,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Navigate to Setting Test Activity
-        TextView btnGoSettingPageTest = findViewById(R.id.btnGoSettingPageTest);
-        btnGoSettingPageTest.setOnClickListener(new View.OnClickListener(){
+        TextView btnSettings = findViewById(R.id.btnSettings);
+        btnSettings.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
                 Intent intent = new Intent(MainActivity.this, SettingActivity.class);

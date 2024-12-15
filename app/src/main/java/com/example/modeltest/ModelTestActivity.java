@@ -19,20 +19,8 @@ public class ModelTestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_model_test);
 
-        TextView onButton = findViewById(R.id.btnStartDetection); // "ON" button
-        TextView offButton = findViewById(R.id.btnStopDetection); // "OFF" button
-
-
-        TextView btnGoBack = findViewById(R.id.btnGoBack);
-
-        btnGoBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(ModelTestActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        });
+        TextView btnStartDetection = findViewById(R.id.btnStartDetection);
+        TextView btnStopDetection = findViewById(R.id.btnStopDetection);
 
         try {
             // Initialize the detector with the TFLite model path
@@ -44,7 +32,7 @@ public class ModelTestActivity extends AppCompatActivity {
         }
 
         // Set up the "ON" button to start detection
-        onButton.setOnClickListener(new View.OnClickListener() {
+        btnStartDetection.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!isDetectionRunning && soundDetector != null) {
@@ -58,7 +46,7 @@ public class ModelTestActivity extends AppCompatActivity {
         });
 
         // Set up the "OFF" button to stop detection
-        offButton.setOnClickListener(new View.OnClickListener() {
+        btnStopDetection.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (isDetectionRunning && soundDetector != null) {

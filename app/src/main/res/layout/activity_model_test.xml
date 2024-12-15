@@ -1,78 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:background="#FFFFFF">
+    android:background="#F5F5F5">
 
+    <!-- Header Section -->
     <LinearLayout
+        android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="#454545"
+        android:padding="16dp">
 
-        <!-- Title -->
         <TextView
-            android:id="@+id/tvTitle"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Vehicle Detection Test"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:gravity="center"
-            android:layout_marginBottom="16dp" />
+            android:textColor="#FFFFFF"
+            android:gravity="center" />
 
-        <!-- Start Detection Button -->
         <TextView
-            android:id="@+id/btnStartDetection"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Start Detection"
-            android:textSize="16sp"
-            android:textColor="@color/white"
-            android:gravity="center"
-            android:background="@drawable/rounded_button"
-            android:padding="10dp"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Start Detection Button -->
-        <TextView
-            android:id="@+id/btnStopDetection"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Stop Detection"
-            android:textSize="16sp"
-            android:textColor="@color/white"
-            android:gravity="center"
-            android:background="@drawable/rounded_button"
-            android:padding="10dp"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Detection Result -->
-        <TextView
-            android:id="@+id/tvResult"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Detection Result: Waiting..."
-            android:textSize="16sp"
-            android:textStyle="italic"
-            android:gravity="center"
-            android:layout_marginTop="16dp" />
-
+            android:text="Test the system's ability to detect vehicles"
+            android:textSize="14sp"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="4dp" />
     </LinearLayout>
 
-    <!-- Go to Home Activity -->
-    <TextView
-        android:id="@+id/btnGoBack"
-        android:layout_width="wrap_content"
+    <!-- Main Content -->
+    <LinearLayout
+        android:id="@+id/mainContent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|bottom"
-        android:layout_marginTop="430dp"
-        android:background="@drawable/rounded_button"
-        android:gravity="center"
-        android:padding="12dp"
-        android:text="Go to Home Page"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        android:textStyle="bold" />
-</LinearLayout>
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_below="@id/header">
+
+        <!-- Status Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_background"
+            android:padding="16dp"
+            android:layout_marginBottom="160dp">
+
+            <TextView
+                android:id="@+id/txtDetectionStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Status: Listening..."
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                android:gravity="center"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/txtAdditionalInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No vehicles detected nearby."
+                android:textSize="14sp"
+                android:textColor="#757575"
+                android:gravity="center" />
+        </LinearLayout>
+
+        <!-- Real-time Feedback Icon -->
+        <ImageView
+            android:id="@+id/imgDetectionStatus"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center"
+            android:src="@drawable/car_detected"
+            android:contentDescription="Detection Status Icon"
+            android:layout_marginBottom="60dp" />
+
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/btnStartDetection"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Start"
+                android:gravity="center"
+                android:backgroundTint="#FF480B"
+                android:textColor="#FFFFFF"
+                android:layout_marginEnd="8dp"
+                android:padding="12dp"
+                android:background="@drawable/rounded_button" />
+
+            <TextView
+                android:id="@+id/btnStopDetection"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Stop"
+                android:gravity="center"
+                android:backgroundTint="#2088FF"
+                android:textColor="#FFFFFF"
+                android:layout_marginStart="8dp"
+                android:padding="12dp"
+                android:background="@drawable/rounded_button" />
+        </LinearLayout>
+
+    </LinearLayout>
+</RelativeLayout>
