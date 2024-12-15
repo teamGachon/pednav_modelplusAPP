@@ -1,5 +1,6 @@
 package com.example.modeltest;
 
+import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 import android.os.Bundle;
@@ -20,6 +21,18 @@ public class ModelTestActivity extends AppCompatActivity {
 
         TextView onButton = findViewById(R.id.btnStartDetection); // "ON" button
         TextView offButton = findViewById(R.id.btnStopDetection); // "OFF" button
+
+
+        TextView btnGoBack = findViewById(R.id.btnGoBack);
+
+        btnGoBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ModelTestActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
 
         try {
             // Initialize the detector with the TFLite model path
