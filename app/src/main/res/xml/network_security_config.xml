@@ -5,5 +5,8 @@
         <domain includeSubdomains="true">192.168.0.100</domain> <!-- 실제 IP 주소 -->
         <domain includeSubdomains="true">inclab.gachon.ac.kr</domain>
         <domain includeSubdomains="true">172.25.87.5</domain>
+        <domain includeSubdomains="true">192.168.219.51</domain>
+        <domain includeSubdomains="true">172.25.80.212</domain>
+
     </domain-config>
 </network-security-config>
