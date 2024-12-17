@@ -24,7 +24,7 @@ public class ModelTestActivity extends AppCompatActivity {
 
     private static final int REQUEST_AUDIO_PERMISSION = 200;
     private static final int SAMPLE_RATE = 16000; // 16 kHz
-    private static final String MODEL_PATH = "app/src/main/assets/car_detection_model.tflite";
+    private static final String MODEL_PATH = "app/src/main/assets/car_detection_model2.tflite";
 
     private AudioRecord audioRecord;
     private boolean isRecording = false;

@@ -75,8 +75,5 @@ dependencies {
     implementation("com.airbnb.android:lottie:3.0.7")
 
 
-    implementation("be.tarsos.dsp:tarsosdsp:2.4")
-    implementation("com.github.psambit9791:jlibrosa:1.0.8")
-
 
 }

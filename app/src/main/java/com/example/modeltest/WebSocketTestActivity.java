@@ -43,7 +43,7 @@ public class WebSocketTestActivity extends AppCompatActivity {
 
         // 권한 확인 및 요청
         if (hasRecordAudioPermission()) {
-            connectWebSocket("ws://172.25.80.212:8080/audio/send");
+            connectWebSocket("ws://192.9.203.19:8080/audio/send");
             startAudioLogging();
         } else {
             requestRecordAudioPermission();
@@ -101,8 +101,14 @@ public class WebSocketTestActivity extends AppCompatActivity {
                     boolean vehicleDetected = json.optBoolean("vehicleDetected", false); // 기본값 false
                     double result = json.optDouble("result", 0.0); // 기본값 0.0
 
+                    long endTime = System.nanoTime(); // T2: 결과 수신 및 화면 출력 시점 기록
+                    long latency = (endTime - startTime[0]) / 1_000_000; // 밀리초 단위로 변환
+
+
                     Log.d(TAG, "차량 감지 여부: " + vehicleDetected);
-                    Log.d(TAG, "모델 결과값 (0~1): " + result);
+                    Log.d(TAG, "모델 결과값: " + result);
+                    Log.d(TAG, "전체 레이턴시: " + latency + " ms");
+
 
                     runOnUiThread(() -> {
                         TextView vehicleDetectedView = findViewById(R.id.vehicleDetectedView);
@@ -125,6 +131,8 @@ public class WebSocketTestActivity extends AppCompatActivity {
             }
         });
     }
+
+    long[] startTime = new long[1]; // 시작 시간 저장
 
     private void startAudioLogging() {
         // 권한 확인
@@ -153,9 +161,10 @@ public class WebSocketTestActivity extends AppCompatActivity {
 
                                 // 웹소켓으로 데이터 전송
                                 if (webSocket != null) {
+                                    startTime[0] = System.nanoTime(); // T1: 소리 수집 시작 시간 기록
                                     // 바이너리 메시지로 데이터 전송
                                     webSocket.send(okio.ByteString.of(buffer, 0, readBytes));
-                                    Log.d(TAG, "웹소켓으로 소리 데이터 전송 완료: " + readBytes + " 바이트");
+                                    Log.d(TAG, "----------------웹소켓으로 소리 데이터 전송 완료: " + readBytes + " 바이트-----------------");
                                 } else {
                                     Log.e(TAG, "웹소켓이 연결되지 않았습니다.");
                                 }
@@ -232,7 +241,7 @@ public class WebSocketTestActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE_RECORD_AUDIO) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Log.d(TAG, "RECORD_AUDIO 권한 승인됨.");
-                connectWebSocket("ws://172.25.80.212:8080/audio/send");
+                connectWebSocket("ws://192.9.203.19:8080/audio/send");
                 startAudioLogging();
             } else {
                 Log.e(TAG, "RECORD_AUDIO 권한 거부됨.");
