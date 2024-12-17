@@ -30,4 +30,8 @@ It's Gachon University's software major graduation project. You can only use pro
 * Add Features
 
 ## 👨‍💻Developers
-* 202234927 Jang Yong Geun : Frontend / UI Design / Development Android
+* 202234927 Jang Yong Geun : Frontend / UI Design / Android
+* 201933966 Yang Si Hun : BackEnd / Android
+* 202035376 Lee Han Yong : AI model / Android
+* 202234944 Han Soo Min : Frontend
+
