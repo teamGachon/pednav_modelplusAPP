@@ -16,8 +16,8 @@ It's Gachon University's software major graduation project. You can only use pro
 3. Setting Feature : Users can change whether to set up GPS permissions, whether to run in the background, etc..
 
 ## 🔩Development Environment
-App Development: Android Studio
-Map Development: Using Naver API
+* App Development: Android Studio
+* Map Development: Using Naver API
 
 ## ⏰Development Period
 * 2024.11.25 ~ 2024.12.01 : Idea Generatio
