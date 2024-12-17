@@ -7,6 +7,9 @@ It's Gachon University's software major graduation project. You can only use pro
 
 * If a vehicle approaches, a special alarm is displayed.
 
+## 🗂️Project Structure
+  ![Project Structure](https://github.com/teamGachon/pednav_modelplusAPP/blob/main/Project%20Structure.png)
+
 ## 🔧Key Features
 1. Map Feature : It can be used as a general pedestrian map app by adding a map function using Naver API
 2. Alarm Feature : When a vehicle approaches a pedestrian, it triggers an alarm so that pedestrians can know
