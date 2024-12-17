@@ -23,13 +23,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Navigate to Detection Test Activity
         TextView btnVehicleDetection = findViewById(R.id.btnVehicleDetection);
-        btnVehicleDetection.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                Intent intent = new Intent(MainActivity.this, ModelTestActivity.class);
-                startActivity(intent);
-            }
-        });
+
 
         // Navigate to Navigation Test Activity
         TextView btnNavigation = findViewById(R.id.btnNavigation);
