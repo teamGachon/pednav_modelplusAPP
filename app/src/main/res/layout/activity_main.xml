@@ -92,6 +92,7 @@
                     android:layout_height="wrap_content"
                     android:backgroundTint="#2088FF"
                     android:text="Go"
+                    android:fontFamily="@font/cafe24decobox"
                     android:textColor="#FFFFFF" />
             </LinearLayout>
 
@@ -139,6 +140,7 @@
                     android:layout_height="wrap_content"
                     android:backgroundTint="#2088FF"
                     android:text="Start"
+                    android:fontFamily="@font/cafe24decobox"
                     android:textColor="#FFFFFF" />
             </LinearLayout>
 
@@ -185,6 +187,7 @@
                     android:layout_height="wrap_content"
                     android:backgroundTint="#2088FF"
                     android:text="Open"
+                    android:fontFamily="@font/cafe24decobox"
                     android:textColor="#FFFFFF" />
             </LinearLayout>
         </LinearLayout>

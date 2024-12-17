@@ -50,14 +50,15 @@ dependencies {
     // for vsm sdk
     implementation("com.google.flatbuffers:flatbuffers-java:1.11.0")
 
-    // TMapAPI SDK
-    implementation(files("libs/com.skt.Tmap_1.76.jar"))
+    // Naver Map sdk
+    implementation("com.naver.maps:map-sdk:3.20.0")
+
 
     // TFLite
     implementation("org.tensorflow:tensorflow-lite:2.12.0")
     implementation("org.tensorflow:tensorflow-lite-support:0.4.0")
 
 
-    implementation("com.google.code.gson:gson:2.10")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 
 }
