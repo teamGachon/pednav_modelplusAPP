@@ -17,7 +17,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven{
-            url = uri("https://devrepo.tmapadmin.com/repository/tmap-sdk-release/");
+            url = uri("https://repository.map.naver.com/archive/maven")
         }
     }
 }

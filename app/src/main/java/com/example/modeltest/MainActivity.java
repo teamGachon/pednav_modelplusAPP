@@ -6,11 +6,19 @@ import android.view.View;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.naver.maps.map.MapFragment;
+import com.naver.maps.map.NaverMapSdk;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        NaverMapSdk.getInstance(this).setClient(
+                new NaverMapSdk.NaverCloudPlatformClient("dexbyijg2d")
+        );
+
         setContentView(R.layout.activity_main);
 
         // Navigate to Detection Test Activity
@@ -28,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         btnNavigation.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                Intent intent = new Intent(MainActivity.this, TMapAPIActivity.class);
+                Intent intent = new Intent(MainActivity.this, MapFragmentActivity.class);
                 startActivity(intent);
             }
         });
