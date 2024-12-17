@@ -9,8 +9,9 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
-
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
 
     <application
@@ -60,11 +61,16 @@
         <!-- WebSocketTestActivity -->
         <activity
             android:name=".WebSocketTestActivity"
-            android:exported="true">
+            android:exported="true"
+            android:foregroundServiceType="microphone">
             <intent-filter>
                 <action android:name="android.intent.action.WEB_SOCKET_TEST" />
             </intent-filter>
         </activity>
-    </application>
 
+
+
+
+
+    </application>
 </manifest>

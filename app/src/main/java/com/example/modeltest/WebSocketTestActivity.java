@@ -1,19 +1,29 @@
 package com.example.modeltest;
 
-
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.Log;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
+
 
 import org.json.JSONObject;
 
@@ -35,11 +45,22 @@ public class WebSocketTestActivity extends AppCompatActivity {
     private static final String TAG = "WebSocketTestActivity";
     private static final int SAMPLE_RATE = 44100;
     private static final int REQUEST_CODE_RECORD_AUDIO = 1001;
+    private static final String CHANNEL_ID = "WebSocketTestChannel";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_websocket_test);
+
+        // Notification 권한 요청 (Android 13 이상)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1002);
+            }
+        }
+
+        // Foreground Service 시작
+        startForegroundService();
 
         // 권한 확인 및 요청
         if (hasRecordAudioPermission()) {
@@ -57,6 +78,43 @@ public class WebSocketTestActivity extends AppCompatActivity {
         if (webSocket != null) {
             webSocket.close(1000, null);
         }
+    }
+
+    /**
+     * Foreground Service 시작
+     */
+    private void startForegroundService() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID, "WebSocket Audio Logging",
+                    NotificationManager.IMPORTANCE_LOW
+            );
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            manager.createNotificationChannel(channel);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                Log.e(TAG, "POST_NOTIFICATIONS 권한이 필요합니다.");
+                return;
+            }
+        }
+
+        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("WebSocket Audio Logging")
+                .setContentText("오디오 데이터를 서버로 전송 중입니다.")
+                .setSmallIcon(android.R.drawable.ic_media_play)
+                .build();
+
+        // Foreground Service 실행
+        Intent serviceIntent = new Intent(this, WebSocketTestActivity.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ContextCompat.startForegroundService(this, serviceIntent);
+        } else {
+            startService(serviceIntent);
+        }
+
+        NotificationManagerCompat.from(this).notify(1, notification);
     }
 
     /**
@@ -91,7 +149,6 @@ public class WebSocketTestActivity extends AppCompatActivity {
                 Log.d(TAG, "웹소켓 연결 성공");
             }
 
-
             @Override
             public void onMessage(WebSocket webSocket, String text) {
                 Log.d(TAG, "서버로부터 메시지 수신: " + text);
@@ -104,11 +161,22 @@ public class WebSocketTestActivity extends AppCompatActivity {
                     long endTime = System.nanoTime(); // T2: 결과 수신 및 화면 출력 시점 기록
                     long latency = (endTime - startTime[0]) / 1_000_000; // 밀리초 단위로 변환
 
-
                     Log.d(TAG, "차량 감지 여부: " + vehicleDetected);
                     Log.d(TAG, "모델 결과값: " + result);
                     Log.d(TAG, "전체 레이턴시: " + latency + " ms");
 
+                    // 차량 감지 시 진동 추가
+                    if (vehicleDetected) {
+                        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                        if (vibrator != null) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE)); // 500ms 진동
+                            } else {
+                                vibrator.vibrate(500); // Deprecated지만 하위 버전 지원
+                            }
+                            Log.d(TAG, "진동 발생: 사고 감지됨");
+                        }
+                    }
 
                     runOnUiThread(() -> {
                         TextView vehicleDetectedView = findViewById(R.id.vehicleDetectedView);
@@ -120,6 +188,7 @@ public class WebSocketTestActivity extends AppCompatActivity {
                     Log.e(TAG, "JSON 파싱 중 오류 발생: " + e.getMessage());
                 }
             }
+
             @Override
             public void onFailure(WebSocket webSocket, Throwable t, okhttp3.Response response) {
                 Log.e(TAG, "웹소켓 오류: " + t.getMessage());
@@ -156,31 +225,18 @@ public class WebSocketTestActivity extends AppCompatActivity {
 
                             int readBytes = audioRecord.read(buffer, 0, buffer.length);
                             if (readBytes > 0) {
-                                // 읽은 데이터를 로그로 출력
-                                //Log.d(TAG, "오디오 데이터 (Hex): " + bytesToHex(buffer, readBytes));
-
-                                // 웹소켓으로 데이터 전송
                                 if (webSocket != null) {
                                     startTime[0] = System.nanoTime(); // T1: 소리 수집 시작 시간 기록
-                                    // 바이너리 메시지로 데이터 전송
                                     webSocket.send(okio.ByteString.of(buffer, 0, readBytes));
-                                    Log.d(TAG, "----------------웹소켓으로 소리 데이터 전송 완료: " + readBytes + " 바이트-----------------");
+                                    Log.d(TAG, "-------------웹소켓으로 소리 데이터 전송 완료: " + readBytes + " 바이트-------------");
                                 } else {
                                     Log.e(TAG, "웹소켓이 연결되지 않았습니다.");
                                 }
                             }
                         } catch (InterruptedException e) {
                             Log.e(TAG, "오디오 로깅 중단됨: " + e.getMessage());
-                            Thread.currentThread().interrupt(); // 현재 스레드 상태 복원
-                            stopAudioLogging(); // 녹음 중지
-                            break;
-                        } catch (SecurityException e) {
-                            Log.e(TAG, "오디오 녹음 권한 부족: " + e.getMessage());
-                            stopAudioLogging(); // 녹음 중지
-                            break;
-                        } catch (Exception e) {
-                            Log.e(TAG, "오디오 로깅 중 예상치 못한 오류: " + e.getMessage());
-                            stopAudioLogging(); // 녹음 중지
+                            Thread.currentThread().interrupt();
+                            stopAudioLogging();
                             break;
                         }
                     }
@@ -192,10 +248,6 @@ public class WebSocketTestActivity extends AppCompatActivity {
         }
     }
 
-
-    /**
-     * 오디오 캡처를 중지
-     */
     private void stopAudioLogging() {
         isRecording = false;
         if (audioRecord != null) {
@@ -211,29 +263,29 @@ public class WebSocketTestActivity extends AppCompatActivity {
         Log.d(TAG, "오디오 로깅 중지됨.");
     }
 
-    /**
-     * AudioRecord 초기화
-     */
     private void initAudioRecorder() {
         try {
-            if (!hasRecordAudioPermission()) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
                 Log.e(TAG, "오디오 녹음 권한이 부여되지 않아 초기화 불가.");
                 return;
             }
 
             int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
             audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
+
+            if (audioRecord.getState() != AudioRecord.STATE_INITIALIZED) {
+                throw new IllegalStateException("AudioRecord 초기화 실패");
+            }
             Log.d(TAG, "AudioRecord가 성공적으로 초기화되었습니다.");
         } catch (SecurityException e) {
-            Log.e(TAG, "오디오 초기화 중 권한 오류: " + e.getMessage());
-        } catch (Exception e) {
+            Log.e(TAG, "오디오 녹음 권한 오류: " + e.getMessage());
+        } catch (IllegalStateException e) {
             Log.e(TAG, "AudioRecord 초기화 실패: " + e.getMessage());
+        } catch (Exception e) {
+            Log.e(TAG, "AudioRecord 초기화 중 알 수 없는 오류: " + e.getMessage());
         }
     }
 
-    /**
-     * 권한 요청 결과 처리
-     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -245,24 +297,17 @@ public class WebSocketTestActivity extends AppCompatActivity {
                 startAudioLogging();
             } else {
                 Log.e(TAG, "RECORD_AUDIO 권한 거부됨.");
+                finish(); // 권한이 없으면 앱 종료 또는 사용자에게 안내
+            }
+        } else if (requestCode == 1002) { // POST_NOTIFICATIONS 처리
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "POST_NOTIFICATIONS 권한 승인됨.");
+                startForegroundService();
+            } else {
+                Log.e(TAG, "POST_NOTIFICATIONS 권한 거부됨.");
             }
         }
     }
 
-    /**
-     * 바이트 배열을 16진수 문자열로 변환
-     */
-    private String bytesToHex(byte[] bytes, int length) {
-        StringBuilder hexString = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            String hex = Integer.toHexString(0xFF & bytes[i]);
-            if (hex.length() == 1) {
-                hexString.append('0');
-            }
-            hexString.append(hex);
-            hexString.append(' ');
-        }
-        return hexString.toString();
-    }
 
 }
