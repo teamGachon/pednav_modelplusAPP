@@ -1,6 +1,12 @@
 package com.example.modeltest;
 
+import android.content.Context;
 import android.content.Intent;
+import android.media.AudioFormat;
+import android.os.Build;
+import android.os.SystemClock;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.Log;
 import android.widget.Toast;
 import android.os.Bundle;
@@ -21,24 +27,34 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import org.tensorflow.lite.Interpreter;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
 public class ModelTestActivity extends AppCompatActivity {
 
-    private static final int REQUEST_AUDIO_PERMISSION = 200;
-    private static final int SAMPLE_RATE = 16000; // 16 kHz
-    private static final String MODEL_PATH = "app/src/main/assets/car_detection_model2.tflite";
+    private static final int REQUEST_PERMISSION_CODE = 100; // 권한 요청 코드
+    private static final int SAMPLE_RATE = 48000; // 샘플링 레이트 (48kHz)
+    private static final int AUDIO_BUFFER_SIZE = SAMPLE_RATE * 2; // 오디오 버퍼 크기
 
-    private AudioRecord audioRecord;
-    private boolean isRecording = false;
-    private Interpreter tflite;
-    private TextView tvResult;
+    private static final String CHANNEL_ID = "ForegroundServiceChannel"; // 알림 채널 ID
+
+    private Interpreter tflite; // TensorFlow Lite 모델 해석기
+    private TextView resultTextView, vehicleDetectedTextView; // UI 텍스트뷰
+    private boolean isRecording = true; // 오디오 녹음 상태 변수
+    private Vibrator vibrator; // 진동 기능 객체
+
+    private static final String TAG = "차량 감지 로그"; // 로그 태그
+    private long startTime; // 레이턴시 시작 시간
+
+    // 변수 추가
+    private TextView scoreTextView; // TensorFlow 수치 값 출력용
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,123 +64,183 @@ public class ModelTestActivity extends AppCompatActivity {
         TextView btnStartDetection = findViewById(R.id.btnStartDetection);
         TextView btnStopDetection = findViewById(R.id.btnStopDetection);
 
-        // Check audio recording permissions
+        // UI 컴포넌트 초기화
+        resultTextView = findViewById(R.id.resultTextView);
+        vehicleDetectedTextView = findViewById(R.id.vehicleDetectedView);
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        scoreTextView = findViewById(R.id.scoreTextView); // TensorFlow 수치 값 출력용 추가
+
+
+        // Foreground Service 시작
+        startMyForegroundService();
+
+        // RECORD_AUDIO 권한 확인 및 요청
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_AUDIO_PERMISSION);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_PERMISSION_CODE);
+        } else {
+            initTFLite(); // TensorFlow Lite 모델 초기화
+            startAudioRecording(); // 오디오 녹음 시작
         }
 
-        // Load TensorFlow Lite model
-        try {
-            tflite = new Interpreter(loadModelFile());
-        } catch (IOException e) {
-            tvResult.setText("Error loading model");
-            e.printStackTrace();
-        }
-
-        // Start detection
+        // Start 버튼 이벤트
         btnStartDetection.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startDetection();
+                if (!isRecording) {
+                    isRecording = true;
+                    startAudioRecording(); // 오디오 녹음 시작
+                    resultTextView.setText("탐지 시작...");
+                }
             }
         });
 
-        // Stop detection
+        // Stop 버튼 이벤트
         btnStopDetection.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                stopDetection();
+                if (isRecording) {
+                    isRecording = false; // 오디오 녹음 중지
+                    resultTextView.setText("탐지 중지됨");
+                }
             }
         });
+
     }
 
-    private void startDetection() {
-        if (isRecording) return;
+    // Foreground Service 시작 메서드
+    private void startMyForegroundService() {
+        Intent serviceIntent = new Intent(this, ForegroundService.class);
 
-        isRecording = true;
-        tvResult.setText("Detection started...");
-
-        int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE,
-                android.media.AudioFormat.CHANNEL_IN_MONO,
-                android.media.AudioFormat.ENCODING_PCM_16BIT);
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,
-                SAMPLE_RATE,
-                android.media.AudioFormat.CHANNEL_IN_MONO,
-                android.media.AudioFormat.ENCODING_PCM_16BIT,
-                bufferSize);
-
-        audioRecord.startRecording();
-
-        new Thread(() -> {
-            short[] buffer = new short[bufferSize / 2];
-            while (isRecording) {
-                int read = audioRecord.read(buffer, 0, buffer.length);
-                if (read > 0) {
-                    analyzeAudio(buffer);
+        // Foreground Service 권한 확인 및 시작
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE) == PackageManager.PERMISSION_GRANTED
+                || Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(serviceIntent);
+                } else {
+                    startService(serviceIntent);
                 }
+            } catch (SecurityException e) {
+                e.printStackTrace();
+                resultTextView.setText("Foreground Service 실행 권한이 거부되었습니다.");
+            }
+        } else {
+            resultTextView.setText("Foreground Service 권한이 필요합니다.");
+        }
+    }
+
+    // TensorFlow Lite 모델 초기화
+    private void initTFLite() {
+        try {
+            FileInputStream fis = new FileInputStream(
+                    getAssets().openFd("car_detection_raw_audio_model.tflite").getFileDescriptor());
+            FileChannel fileChannel = fis.getChannel();
+            long startOffset = getAssets().openFd("car_detection_raw_audio_model.tflite").getStartOffset();
+            long declaredLength = getAssets().openFd("car_detection_raw_audio_model.tflite").getDeclaredLength();
+            ByteBuffer modelBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
+
+            tflite = new Interpreter(modelBuffer); // 모델 로드
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 오디오 녹음 시작 메서드
+    private void startAudioRecording() {
+        new Thread(() -> {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                    != PackageManager.PERMISSION_GRANTED) {
+                runOnUiThread(() -> resultTextView.setText("Audio recording permission is not granted."));
+                return;
+            }
+
+            try {
+                // AudioRecord 객체 초기화
+                AudioRecord recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
+                        SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO,
+                        AudioFormat.ENCODING_PCM_16BIT, AUDIO_BUFFER_SIZE);
+
+                short[] audioData = new short[AUDIO_BUFFER_SIZE / 2];
+                recorder.startRecording(); // 오디오 녹음 시작
+
+                while (isRecording) {
+                    startTime = SystemClock.elapsedRealtime(); // 레이턴시 시작 시간 기록
+                    int result = recorder.read(audioData, 0, audioData.length);
+                    if (result > 0) {
+                        runOnUiThread(() -> detectSound(audioData)); // 오디오 데이터 분석
+                    }
+                }
+
+                recorder.stop(); // 녹음 중지
+                recorder.release();
+            } catch (SecurityException e) {
+                e.printStackTrace();
+                runOnUiThread(() -> resultTextView.setText("Permission denied to record audio."));
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> resultTextView.setText("Error starting audio recording."));
             }
         }).start();
     }
 
-    private void stopDetection() {
-        if (!isRecording) return;
+    private void detectSound(short[] audioData) {
+        float[][][] input = new float[1][96000][1];
+        int length = Math.min(audioData.length, 96000);
 
-        isRecording = false;
-        audioRecord.stop();
-        audioRecord.release();
-        audioRecord = null;
-
-        tvResult.setText("Detection stopped.");
-    }
-
-    private void analyzeAudio(short[] audioData) {
-        // Convert audio data to float
-        float[] input = new float[audioData.length];
-        for (int i = 0; i < audioData.length; i++) {
-            input[i] = audioData[i] / 32768.0f; // Normalize audio data
+        for (int i = 0; i < length; i++) {
+            input[0][i][0] = audioData[i] / 32768.0f; // 데이터 정규화;
         }
 
-        // Run inference using TensorFlow Lite
-        float[][] output = new float[1][1]; // Adjust output shape based on the model
+        float[][] output = new float[1][1];
         tflite.run(input, output);
 
-        // Update UI with detection result
+        long endTime = SystemClock.elapsedRealtime(); // 레이턴시 종료 시간 기록
+        long latency = endTime - startTime; // 레이턴시 계산
+
+        float detectionValue = output[0][0]; // 모델 출력값
+        boolean vehicleDetected = detectionValue < 0.5; // 감지 기준
+
+        Log.d(TAG, "결과: " + detectionValue);
+        Log.d(TAG, "레이턴시(ms): " + latency);
+
         runOnUiThread(() -> {
-            if (output[0][0] > 0.5) {
-                tvResult.setText("Detection Result: Vehicle Detected!");
-            } else {
-                tvResult.setText("Detection Result: No Vehicle Detected.");
+            resultTextView.setText(vehicleDetected ? "Car Detected" : "No Car Sound");
+            vehicleDetectedTextView.setText("차량 감지 여부: " + (vehicleDetected ? "감지됨" : "미감지"));
+
+            // TensorFlow 수치 값을 출력
+            scoreTextView.setText(String.format("Detection Score: %.4f", detectionValue));
+
+            // 차량 감지 시 진동
+            if (vehicleDetected) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
+                } else {
+                    vibrator.vibrate(500);
+                }
             }
         });
-    }
-
-    private MappedByteBuffer loadModelFile() throws IOException {
-        FileInputStream fileInputStream = new FileInputStream(getAssets().openFd(MODEL_PATH).getFileDescriptor());
-        FileChannel fileChannel = fileInputStream.getChannel();
-        long startOffset = fileInputStream.getChannel().position();
-        long declaredLength = fileInputStream.getChannel().size();
-        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_AUDIO_PERMISSION) {
-            if (grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                tvResult.setText("Audio permission is required.");
+        if (requestCode == REQUEST_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                initTFLite(); // 권한 승인 후 모델 초기화
+                startAudioRecording();
+            } else {
+                resultTextView.setText("Audio recording permission is required.");
             }
         }
     }
-}
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        isRecording = false; // 녹음 상태 종료
+        if (tflite != null) {
+            tflite.close(); // 모델 닫기
+        }
+    }
+
+}
